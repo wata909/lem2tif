@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>3D Terrain</title>
+    <meta property="og:description" content="Go beyond hillshade and show elevation in actual 3D." />
+    <meta charset='utf-8'>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel='stylesheet' href='https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.css' />
+    <script src='https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.js'></script>
+    <style>
+        body { margin: 0; padding: 0; }
+        html, body, #map { height: 100%; }
+    </style>
+</head>
+<body>
+<div id="map"></div>
+<script>
+    const map = (window.map = new maplibregl.Map({
+        container: 'map',
+        zoom: 18,
+        center: [139.661834, 35.267296],
+        pitch: 45,
+        hash: true,
+        style: {
+            version: 8,
+            sources: {
+                osm: {
+                    type: 'raster',
+                    tiles: ['https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg'], //衛星写真
+                    tileSize: 256,
+                    attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">地理院タイル</a>',
+                    maxzoom: 19
+                },
+                // Use a different source for terrain and hillshade layers, to improve render quality
+                terrainSource: {
+                    type: 'raster-dem',
+                    tiles: ["https://wata909.github.io/lem2tif/test/yokosuka_tiles_001/{z}/{x}/{y}.png"], //G空間情報センター 神奈川県のDEM
+                    tileSize: 256,
+                    attribution: '<a href="https://www.geospatial.jp/ckan/dataset/dem05_tochigi" target="_blank">神奈川県</a>',
+                    minzoom: 15,
+                    maxzoom: 18
+                }
+            },
+            layers: [
+                {
+                    id: 'osm',
+                    type: 'raster',
+                    source: 'osm'
+                }
+            ],
+            terrain: {
+                source: 'terrainSource',
+                exaggeration: 1
+            },
+            sky: {}
+        },
+        maxZoom: 18,
+        maxPitch: 85
+    }));
+
+    map.addControl(
+        new maplibregl.NavigationControl({
+            visualizePitch: true,
+            showZoom: true,
+            showCompass: true
+        })
+    );
+
+    map.addControl(
+        new maplibregl.TerrainControl({
+            source: 'terrainSource',
+            exaggeration: 1
+        })
+    );
+</script>
+</body>
+</html>
