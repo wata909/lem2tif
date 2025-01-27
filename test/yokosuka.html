@@ -6,103 +6,67 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel='stylesheet' href='https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.css' />
     <script src='https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.js'></script>
-    <script src="https://unpkg.com/pmtiles@2.10.0/dist/index.js"></script>
     <style>
         body, html, #map { height: 100%; margin: 0; padding: 0; }
     </style>
 </head>
 <body>
 <div id="map"></div>
-<script type="module">
-    import { Protocol as PMTilesProtocol } from 'https://unpkg.com/pmtiles@2.10.0/dist/index.js';
-
+<script>
     const map = new maplibregl.Map({
         container: 'map',
-        style: {
-            "version": 8,
-            "sources": {
-                "yokosuka": {
-                    "type": 'raster',
-                    "tiles": ['https://wata909.github.io/lem2tif/test/aerial/{z}/{x}/{y}.jpg'],
-                    "tileSize": 256,
-                    "attribution": '神奈川県',
-                    "maxzoom": 20
-                },
-                "terrainSource": {
-                    "type": 'raster-dem',
-                    "tiles": ["https://wata909.github.io/lem2tif/test/yokosuka_tiles_001/{z}/{x}/{y}.png"],
-                    "tileSize": 256,
-                    "attribution": '神奈川県',
-                    "minzoom": 15,
-                    "maxzoom": 18
-                },
-                "gsi": {
-                    "type": "vector",
-                    "tiles": [
-                        "pmtiles://https://cyberjapandata.gsi.go.jp/xyz/optimal_bvmap-v1/optimal_bvmap-v1.pmtiles/{z}/{x}/{y}"
-                    ],
-                    "minzoom": 4,
-                    "maxzoom": 16,
-                    "attribution": "国土地理院最適化ベクトルタイル(標準地図風スタイル)"
-                }
-            },
-            "layers": [
-                {
-                    "id": 'yokosuka',
-                    "type": 'raster',
-                    "source": 'yokosuka'
-                },
-                {
-                    "id": "背景",
-                    "type": "background",
-                    "paint": {"background-color": "rgba(255,255,255,1)"}
-                },
-                {
-                    "id": "行政区画",
-                    "type": "fill",
-                    "source": "gsi",
-                    "source-layer": "AdmArea",
-                    "paint": {"fill-color": "rgba(255,255,255,1)"}
-                },
-                {
-                    "id": "道路",
-                    "type": "line",
-                    "source": "gsi",
-                    "source-layer": "RdCL",
-                    "paint": {"line-color": "rgb(255,0,0)", "line-width": 2}
-                },
-                {
-                    "id": "水域",
-                    "type": "fill",
-                    "source": "gsi",
-                    "source-layer": "WA",
-                    "paint": {"fill-color": "rgba(190,210,255,1)"}
-                }
-            ],
-            "terrain": {
-                "source": "terrainSource",
-                "exaggeration": 1.5
-            }
-        },
-        center: [139.652654, 35.283524],
+        style: 'std.json', // 正確なパスに修正してください
+        center: [139.652654, 35.283524], // 横須賀市の中心を初期表示位置に設定
         zoom: 18,
         pitch: 65,
         bearing: 0
     });
 
+    map.on('style.load', () => {
+        // 地形データソースを追加
+        map.addSource('terrainSource', {
+            type: 'raster-dem',
+            tiles: ["https://wata909.github.io/lem2tif/test/yokosuka_tiles_001/{z}/{x}/{y}.png"],
+            tileSize: 256,
+            attribution: '神奈川県',
+            minzoom: 15,
+            maxzoom: 18
+        });
+
+        // 地形レイヤーを追加
+        map.addLayer({
+            id: 'terrain',
+            type: 'hillshade',
+            source: 'terrainSource',
+            layout: {},
+            paint: {}
+        });
+
+        // 空中写真ソースを追加
+        map.addSource('yokosuka', {
+            type: 'raster',
+            tiles: ['https://wata909.github.io/lem2tif/test/aerial/{z}/{x}/{y}.jpg'],
+            tileSize: 256,
+            attribution: '神奈川県',
+            maxzoom: 20
+        });
+
+        // 空中写真レイヤーを追加
+        map.addLayer({
+            id: 'yokosuka-photo',
+            type: 'raster',
+            source: 'yokosuka',
+            layout: {},
+            paint: {}
+        }, 'terrain'); // 地形の下に配置
+    });
+
     map.addControl(new maplibregl.NavigationControl());
-    map.addControl(new maplibregl.FullscreenControl());
     map.addControl(new maplibregl.ScaleControl({maxWidth: 200, unit: 'metric'}));
     map.addControl(new maplibregl.GeolocateControl({
         positionOptions: {enableHighAccuracy: true},
         trackUserLocation: true
     }));
-
-    // PMTiles protocol for loading vector tiles
-    maplibregl.addProtocol("pmtiles", (params, callback) => {
-        const protocol = new PMTilesProtocol('https://cyberjapandata.gsi.go.jp/xyz/optimal_bvmap-v1/optimal_bvmap-v1.pmtiles');
-        return protocol.tile(params, callback);
-    });
 </script>
 </body>
 </html>
