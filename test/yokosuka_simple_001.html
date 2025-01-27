@@ -24,12 +24,12 @@
         style: {
             version: 8,
             sources: {
-                osm: {
+                yokosuka: {
                     type: 'raster',
-                    tiles: ['https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg'], //衛星写真
+                    tiles: ['https://wata909.github.io/lem2tif/test/aerial/{z}/{x}/{y}.jpg'], //空中写真
                     tileSize: 256,
-                    attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">地理院タイル</a>',
-                    maxzoom: 19
+                    attribution: '<a href="https://www.geospatial.jp/ckan/dataset/dem05_tochigi" target="_blank">神奈川県</a>',
+                    maxzoom: 20
                 },
                 // Use a different source for terrain and hillshade layers, to improve render quality
                 terrainSource: {
@@ -43,9 +43,9 @@
             },
             layers: [
                 {
-                    id: 'osm',
+                    id: 'yokosuka',
                     type: 'raster',
-                    source: 'osm'
+                    source: 'yokosuka'
                 }
             ],
             terrain: {
@@ -54,7 +54,7 @@
             },
             sky: {}
         },
-        maxZoom: 18,
+        maxZoom: 20,
         maxPitch: 85
     }));
 
