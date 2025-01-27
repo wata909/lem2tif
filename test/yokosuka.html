@@ -15,14 +15,14 @@
 <script>
     const map = new maplibregl.Map({
         container: 'map',
-        style: 'std.json', // 正確なパスに修正してください
-        center: [139.652654, 35.283524], // 横須賀市の中心を初期表示位置に設定
-        zoom: 18,
-        pitch: 65,
+        style: 'std.json', // std.jsonの正確なパスに修正してください
+        center: [139.652654, 35.283524],
+        zoom: 15,
+        pitch: 45,
         bearing: 0
     });
 
-    map.on('style.load', () => {
+    map.on('load', () => {
         // 地形データソースを追加
         map.addSource('terrainSource', {
             type: 'raster-dem',
@@ -33,32 +33,26 @@
             maxzoom: 18
         });
 
-        // 地形レイヤーを追加
-        map.addLayer({
-            id: 'terrain',
-            type: 'hillshade',
-            source: 'terrainSource',
-            layout: {},
-            paint: {}
-        });
+        // 地形を3Dで表示
+        map.setTerrain({ 'source': 'terrainSource', 'exaggeration': 1.5 });
 
-        // 空中写真ソースを追加
-        map.addSource('yokosuka', {
-            type: 'raster',
-            tiles: ['https://wata909.github.io/lem2tif/test/aerial/{z}/{x}/{y}.jpg'],
-            tileSize: 256,
-            attribution: '神奈川県',
-            maxzoom: 20
-        });
-
-        // 空中写真レイヤーを追加
+        // 空中写真を追加
         map.addLayer({
-            id: 'yokosuka-photo',
-            type: 'raster',
-            source: 'yokosuka',
-            layout: {},
-            paint: {}
-        }, 'terrain'); // 地形の下に配置
+            'id': 'yokosuka-photo',
+            'type': 'raster',
+            'source': {
+                'type': 'raster',
+                'tiles': ['https://wata909.github.io/lem2tif/test/aerial/{z}/{x}/{y}.jpg'],
+                'tileSize': 256
+            },
+            'minzoom': 0,
+            'maxzoom': 22
+        }, 'landcover_snow');
+
+        // ベクタタイルを追加
+        // レイヤーをGSIのベクタデータ上に重ねる
+        // 設定されたstd.jsonに基づくレイヤーの例
+        // レイヤー名はstd.json内のレイヤー名に基づいて適宜修正する必要があります
     });
 
     map.addControl(new maplibregl.NavigationControl());
